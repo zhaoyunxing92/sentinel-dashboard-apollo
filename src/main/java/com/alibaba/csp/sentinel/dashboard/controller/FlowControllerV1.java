@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author leyou
  * @author Eric Zhao
  */
-@RestController
+/*@RestController
 @RequestMapping(value = "/v1/flow")
 public class FlowControllerV1 {
 
@@ -271,4 +271,4 @@ public class FlowControllerV1 {
         List<FlowRuleEntity> rules = repository.findAllByMachine(MachineInfo.of(app, ip, port));
         return sentinelApiClient.setFlowRuleOfMachine(app, ip, port, rules);
     }
-}
+}*/

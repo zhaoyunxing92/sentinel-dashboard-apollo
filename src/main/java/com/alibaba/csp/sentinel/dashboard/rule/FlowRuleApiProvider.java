@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 /**
  * @author Eric Zhao
  */
-@Component("flowRuleDefaultProvider")
+/*@Component("flowRuleDefaultProvider")
 public class FlowRuleApiProvider implements DynamicRuleProvider<List<FlowRuleEntity>> {
 
     @Autowired
@@ -56,4 +56,4 @@ public class FlowRuleApiProvider implements DynamicRuleProvider<List<FlowRuleEnt
             return sentinelApiClient.fetchFlowRuleOfMachine(machine.getApp(), machine.getIp(), machine.getPort());
         }
     }
-}
+}*/

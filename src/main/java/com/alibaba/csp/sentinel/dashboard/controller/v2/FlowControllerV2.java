@@ -57,24 +57,18 @@ public class FlowControllerV2 {
 
     private final Logger logger = LoggerFactory.getLogger(FlowControllerV2.class);
 
-    @Autowired
-    private InMemoryRuleRepositoryAdapter<FlowRuleEntity> repository;
-
-    //    @Autowired
-    //    @Qualifier("flowRuleDefaultProvider")
-    //    private DynamicRuleProvider<List<FlowRuleEntity>> ruleProvider;
-    //    @Autowired
-    //    @Qualifier("flowRuleDefaultPublisher")
-    //    private DynamicRulePublisher<List<FlowRuleEntity>> rulePublisher;
-    @Autowired
-    @Qualifier("flowRuleApolloProvider")
-    private DynamicRuleProvider<List<FlowRuleEntity>> ruleProvider;
-    @Autowired
-    @Qualifier("flowRuleApolloPublisher")
-    private DynamicRulePublisher<List<FlowRuleEntity>> rulePublisher;
+    private final InMemoryRuleRepositoryAdapter<FlowRuleEntity> repository;
+    private final DynamicRuleProvider<List<FlowRuleEntity>> ruleProvider;
+    private final DynamicRulePublisher<List<FlowRuleEntity>> rulePublisher;
+    private final AuthService<HttpServletRequest> authService;
 
     @Autowired
-    private AuthService<HttpServletRequest> authService;
+    public FlowControllerV2(InMemoryRuleRepositoryAdapter<FlowRuleEntity> repository, @Qualifier("flowRuleApolloProvider") DynamicRuleProvider<List<FlowRuleEntity>> ruleProvider, @Qualifier("flowRuleApolloPublisher") DynamicRulePublisher<List<FlowRuleEntity>> rulePublisher, AuthService<HttpServletRequest> authService) {
+        this.repository = repository;
+        this.ruleProvider = ruleProvider;
+        this.rulePublisher = rulePublisher;
+        this.authService = authService;
+    }
 
     @GetMapping("/rules")
     public Result<List<FlowRuleEntity>> apiQueryMachineRules(HttpServletRequest request, @RequestParam String app) {
