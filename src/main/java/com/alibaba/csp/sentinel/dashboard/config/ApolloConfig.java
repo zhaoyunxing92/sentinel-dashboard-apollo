@@ -17,11 +17,13 @@ package com.alibaba.csp.sentinel.dashboard.config;
 
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
 import com.alibaba.csp.sentinel.datasource.Converter;
+import com.alibaba.csp.sentinel.util.AssertUtil;
 import com.alibaba.fastjson.JSON;
 import com.ctrip.framework.apollo.openapi.client.ApolloOpenApiClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.Assert;
 
 import java.util.List;
 
@@ -34,7 +36,7 @@ public class ApolloConfig {
     @Value("${apollo.portal.url:http://localhost:8070}")
     private String portalUrl;
 
-    @Value("${apollo.portal.token:e54e5a52af2840cb2e82e71196f67ab384b0c538}")
+    @Value("${apollo.portal.token}")
     private String token;
 
     @Bean
@@ -49,6 +51,8 @@ public class ApolloConfig {
 
     @Bean
     public ApolloOpenApiClient apolloOpenApiClient() {
+        Assert.notNull(token,"apollo portal token cannot be empty");
+
         return ApolloOpenApiClient.newBuilder()
                 .withPortalUrl(portalUrl)
                 .withToken(token)
