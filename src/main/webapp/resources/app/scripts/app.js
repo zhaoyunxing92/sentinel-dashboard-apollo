@@ -52,9 +52,9 @@ angular
 
       $ocLazyLoadProvider.config({
         debug: false,
-        events: true,
+        events: true
       });
-
+       // 默认路径
       $urlRouterProvider.otherwise('/dashboard/home');
 
       $stateProvider
@@ -67,7 +67,7 @@ angular
                     return $ocLazyLoad.load({
                         name: 'sentinelDashboardApp',
                         files: [
-                            'app/scripts/controllers/login.js',
+                            'app/scripts/controllers/login.js'
                         ]
                     });
                 }]
@@ -85,7 +85,7 @@ angular
                 files: [
                   'app/scripts/directives/header/header.js',
                   'app/scripts/directives/sidebar/sidebar.js',
-                  'app/scripts/directives/sidebar/sidebar-search/sidebar-search.js',
+                  'app/scripts/directives/sidebar/sidebar-search/sidebar-search.js'
                 ]
               });
           }]
@@ -100,7 +100,7 @@ angular
             return $ocLazyLoad.load({
               name: 'sentinelDashboardApp',
               files: [
-                'app/scripts/controllers/main.js',
+                'app/scripts/controllers/main.js'
               ]
             });
           }]
@@ -116,7 +116,7 @@ angular
             return $ocLazyLoad.load({
               name: 'sentinelDashboardApp',
               files: [
-                'app/scripts/controllers/flow_v1.js',
+                'app/scripts/controllers/flow_v1.js'
               ]
             });
           }]
@@ -132,7 +132,7 @@ angular
                     return $ocLazyLoad.load({
                         name: 'sentinelDashboardApp',
                         files: [
-                            'app/scripts/controllers/flow_v2.js',
+                            'app/scripts/controllers/flow_v2.js'
                         ]
                     });
                 }]
@@ -148,7 +148,7 @@ angular
             return $ocLazyLoad.load({
               name: 'sentinelDashboardApp',
               files: [
-                'app/scripts/controllers/param_flow.js',
+                'app/scripts/controllers/param_flow.js'
               ]
             });
           }]
@@ -164,7 +164,7 @@ angular
                     return $ocLazyLoad.load({
                         name: 'sentinelDashboardApp',
                         files: [
-                            'app/scripts/controllers/cluster_app_assign_manage.js',
+                            'app/scripts/controllers/cluster_app_assign_manage.js'
                         ]
                     });
                 }]
@@ -180,7 +180,7 @@ angular
                     return $ocLazyLoad.load({
                         name: 'sentinelDashboardApp',
                         files: [
-                            'app/scripts/controllers/cluster_app_server_list.js',
+                            'app/scripts/controllers/cluster_app_server_list.js'
                         ]
                     });
                 }]
@@ -196,7 +196,7 @@ angular
                     return $ocLazyLoad.load({
                         name: 'sentinelDashboardApp',
                         files: [
-                            'app/scripts/controllers/cluster_app_token_client_list.js',
+                            'app/scripts/controllers/cluster_app_token_client_list.js'
                         ]
                     });
                 }]
@@ -212,7 +212,7 @@ angular
                     return $ocLazyLoad.load({
                         name: 'sentinelDashboardApp',
                         files: [
-                            'app/scripts/controllers/cluster_single.js',
+                            'app/scripts/controllers/cluster_single.js'
                         ]
                     });
                 }]
@@ -228,7 +228,7 @@ angular
                     return $ocLazyLoad.load({
                         name: 'sentinelDashboardApp',
                         files: [
-                            'app/scripts/controllers/authority.js',
+                            'app/scripts/controllers/authority.js'
                         ]
                     });
                 }]
@@ -244,7 +244,7 @@ angular
             return $ocLazyLoad.load({
               name: 'sentinelDashboardApp',
               files: [
-                'app/scripts/controllers/degrade.js',
+                'app/scripts/controllers/degrade.js'
               ]
             });
           }]
@@ -260,7 +260,7 @@ angular
             return $ocLazyLoad.load({
               name: 'sentinelDashboardApp',
               files: [
-                'app/scripts/controllers/system.js',
+                'app/scripts/controllers/system.js'
               ]
             });
           }]
@@ -276,7 +276,7 @@ angular
             return $ocLazyLoad.load({
               name: 'sentinelDashboardApp',
               files: [
-                'app/scripts/controllers/machine.js',
+                'app/scripts/controllers/machine.js'
               ]
             });
           }]
@@ -292,7 +292,7 @@ angular
             return $ocLazyLoad.load({
               name: 'sentinelDashboardApp',
               files: [
-                'app/scripts/controllers/identity.js',
+                'app/scripts/controllers/identity.js'
               ]
             });
           }]
@@ -307,7 +307,7 @@ angular
             return $ocLazyLoad.load({
               name: 'sentinelDashboardApp',
               files: [
-                'app/scripts/controllers/metric.js',
+                'app/scripts/controllers/metric.js'
               ]
             });
           }]
