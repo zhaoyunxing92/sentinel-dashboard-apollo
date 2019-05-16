@@ -159,7 +159,7 @@ app.controller('IdentityCtl', ['$scope', '$stateParams', 'IdentityService',
             return;
         }
       DegradeService.newRule(degradeRuleDialogScope.currentRule).success(function (data) {
-        if (data.code == 0) {
+        if (data.code === 0) {
           degradeRuleDialog.close();
           var url = '/dashboard/degrade/' + $scope.app;
           $location.path(url);
@@ -174,7 +174,7 @@ app.controller('IdentityCtl', ['$scope', '$stateParams', 'IdentityService',
             return;
         }
       DegradeService.newRule(degradeRuleDialogScope.currentRule).success(function (data) {
-        if (data.code == 0) {
+        if (data.code === 0) {
           degradeRuleDialog.close();
         } else {
           alert('失败!');
