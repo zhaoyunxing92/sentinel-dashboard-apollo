@@ -8,7 +8,7 @@ package com.alibaba.csp.sentinel.dashboard.rule;
  * @date: 2019-05-16 14:11
  * @des:
  */
-public interface ApolloRuleService<T> {
+public interface DynamicRuleService<T> {
     /**
      *
      */

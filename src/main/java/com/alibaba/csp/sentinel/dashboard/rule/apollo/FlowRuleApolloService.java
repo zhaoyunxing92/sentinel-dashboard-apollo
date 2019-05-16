@@ -16,53 +16,41 @@
 package com.alibaba.csp.sentinel.dashboard.rule.apollo;
 
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
-import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
-import com.alibaba.csp.sentinel.datasource.Converter;
+import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleService;
 import com.alibaba.csp.sentinel.util.StringUtil;
-import com.ctrip.framework.apollo.openapi.client.ApolloOpenApiClient;
-import com.ctrip.framework.apollo.openapi.dto.OpenItemDTO;
-import com.ctrip.framework.apollo.openapi.dto.OpenNamespaceDTO;
+import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author 2385585770@qq.com
+ * @author zhaoyunxing
  * @since 1.6.0
  */
-@Service("flowRuleApolloProvider")
-public class FlowRuleApolloProvider implements DynamicRuleProvider<List<FlowRuleEntity>> {
+@Service
+public class FlowRuleApolloService implements DynamicRuleService<List<FlowRuleEntity>> {
 
-    private final ApolloOpenApiClient apolloOpenApiClient;
-    private final Converter<String, List<FlowRuleEntity>> converter;
-
-    @Value("${env:DEV}")
-    private String env;
+    private final ApolloDynamicRuleService apolloService;
 
     @Autowired
-    public FlowRuleApolloProvider(ApolloOpenApiClient apolloOpenApiClient, Converter<String, List<FlowRuleEntity>> converter) {
-        this.apolloOpenApiClient = apolloOpenApiClient;
-        this.converter = converter;
+    public FlowRuleApolloService(ApolloDynamicRuleService apolloService) {
+        this.apolloService = apolloService;
     }
 
     @Override
     public List<FlowRuleEntity> getRules(String appName) throws Exception {
-        String flowDataId = "sentinel.flowRules";
-        OpenNamespaceDTO openNamespaceDTO = apolloOpenApiClient.getNamespace(appName, env, "default", "application");
-        String rules = openNamespaceDTO
-            .getItems()
-            .stream()
-            .filter(p -> p.getKey().equals(flowDataId))
-            .map(OpenItemDTO::getValue)
-            .findFirst()
-            .orElse("");
 
+        String rules = apolloService.getRules(appName, flowRuleKey);
         if (StringUtil.isEmpty(rules)) {
             return new ArrayList<>();
         }
-        return converter.convert(rules);
+        return JSON.parseArray(rules, FlowRuleEntity.class);
+    }
+
+    @Override
+    public void publish(String appName, List<FlowRuleEntity> rules) throws Exception {
+        apolloService.publish(appName, flowRuleKey, JSON.toJSONString(rules));
     }
 }
