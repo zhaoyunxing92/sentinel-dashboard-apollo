@@ -15,49 +15,26 @@
  */
 package com.alibaba.csp.sentinel.dashboard.controller;
 
-import java.util.Date;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.alibaba.csp.sentinel.dashboard.client.SentinelApiClient;
-import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
-import com.alibaba.csp.sentinel.dashboard.auth.AuthService;
-import com.alibaba.csp.sentinel.dashboard.auth.AuthService.AuthUser;
-import com.alibaba.csp.sentinel.dashboard.auth.AuthService.PrivilegeType;
-import com.alibaba.csp.sentinel.slots.block.RuleConstant;
-import com.alibaba.csp.sentinel.util.StringUtil;
-
-import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.DegradeRuleEntity;
-import com.alibaba.csp.sentinel.dashboard.domain.Result;
-import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemDegradeRuleStore;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 /**
  * @author leyou
  */
-@Controller
+/*@RestController
 @RequestMapping(value = "/degrade", produces = MediaType.APPLICATION_JSON_VALUE)
 public class DegradeController {
 
     private final Logger logger = LoggerFactory.getLogger(DegradeController.class);
 
-    @Autowired
-    private InMemDegradeRuleStore repository;
-    @Autowired
-    private SentinelApiClient sentinelApiClient;
+    private final InMemDegradeRuleStore repository;
+    private final SentinelApiClient sentinelApiClient;
+    private final AuthService<HttpServletRequest> authService;
 
     @Autowired
-    private AuthService<HttpServletRequest> authService;
+    public DegradeController(InMemDegradeRuleStore repository, SentinelApiClient sentinelApiClient, AuthService<HttpServletRequest> authService) {
+        this.repository = repository;
+        this.sentinelApiClient = sentinelApiClient;
+        this.authService = authService;
+    }
 
-    @ResponseBody
     @RequestMapping("/rules.json")
     public Result<List<DegradeRuleEntity>> queryMachineRules(HttpServletRequest request, String app, String ip, Integer port) {
         AuthUser authUser = authService.getAuthUser(request);
@@ -82,7 +59,6 @@ public class DegradeController {
         }
     }
 
-    @ResponseBody
     @RequestMapping("/new.json")
     public Result<DegradeRuleEntity> add(HttpServletRequest request,
                                          String app, String ip, Integer port, String limitApp, String resource,
@@ -141,7 +117,6 @@ public class DegradeController {
         return Result.ofSuccess(entity);
     }
 
-    @ResponseBody
     @RequestMapping("/save.json")
     public Result<DegradeRuleEntity> updateIfNotNull(HttpServletRequest request,
                                                      Long id, String app, String limitApp, String resource,
@@ -193,7 +168,6 @@ public class DegradeController {
         return Result.ofSuccess(entity);
     }
 
-    @ResponseBody
     @RequestMapping("/delete.json")
     public Result<Long> delete(HttpServletRequest request, Long id) {
         AuthUser authUser = authService.getAuthUser(request);
@@ -222,4 +196,4 @@ public class DegradeController {
         List<DegradeRuleEntity> rules = repository.findAllByMachine(MachineInfo.of(app, ip, port));
         return sentinelApiClient.setDegradeRuleOfMachine(app, ip, port, rules);
     }
-}
+}*/

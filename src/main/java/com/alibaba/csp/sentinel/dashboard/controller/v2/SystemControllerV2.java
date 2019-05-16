@@ -18,17 +18,17 @@ package com.alibaba.csp.sentinel.dashboard.controller.v2;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService.AuthUser;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService.PrivilegeType;
-import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.DegradeRuleEntity;
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.SystemRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.domain.Result;
-import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemDegradeRuleStore;
-import com.alibaba.csp.sentinel.dashboard.rule.apollo.DegradeRuleApolloService;
-import com.alibaba.csp.sentinel.slots.block.RuleConstant;
+import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemSystemRuleStore;
+import com.alibaba.csp.sentinel.dashboard.rule.apollo.SystemRuleApolloService;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,31 +37,29 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author leyou
+ * @author leyou(lihao)
  * @author zhaoyunxing
  */
 @RestController
-@RequestMapping(value = "/degrade", produces = MediaType.APPLICATION_JSON_VALUE)
-public class DegradeControllerV2 {
+@RequestMapping(value = "/system", produces = MediaType.APPLICATION_JSON_VALUE)
+public class SystemControllerV2 {
+    private static Logger logger = LoggerFactory.getLogger(SystemControllerV2.class);
 
-    private final Logger logger = LoggerFactory.getLogger(DegradeControllerV2.class);
-
-    private final InMemDegradeRuleStore repository;
-    private final DegradeRuleApolloService degradeRuleApolloService;
+    private final InMemSystemRuleStore repository;
+    private final SystemRuleApolloService systemRuleApolloService;
     private final AuthService<HttpServletRequest> authService;
 
     @Autowired
-    public DegradeControllerV2(InMemDegradeRuleStore repository, DegradeRuleApolloService degradeRuleApolloService, AuthService<HttpServletRequest> authService) {
+    public SystemControllerV2(InMemSystemRuleStore repository, SystemRuleApolloService systemRuleApolloService, AuthService<HttpServletRequest> authService) {
         this.repository = repository;
-        this.degradeRuleApolloService = degradeRuleApolloService;
+        this.systemRuleApolloService = systemRuleApolloService;
         this.authService = authService;
     }
 
-    @RequestMapping("/rules.json")
-    public Result<List<DegradeRuleEntity>> queryMachineRules(HttpServletRequest request, String app, String ip, Integer port) {
+    @GetMapping("/rules.json")
+    Result<List<SystemRuleEntity>> queryMachineRules(HttpServletRequest request, String app, String ip, Integer port) {
         AuthUser authUser = authService.getAuthUser(request);
         authUser.authTarget(app, PrivilegeType.READ_RULE);
-
         if (StringUtil.isEmpty(app)) {
             return Result.ofFail(-1, "app can't be null or empty");
         }
@@ -72,7 +70,7 @@ public class DegradeControllerV2 {
             return Result.ofFail(-1, "port can't be null");
         }
         try {
-            List<DegradeRuleEntity> rules = degradeRuleApolloService.getRules(app);
+            List<SystemRuleEntity> rules = systemRuleApolloService.getRules(app);
             rules = repository.saveAll(rules);
             return Result.ofSuccess(rules);
         } catch (Throwable throwable) {
@@ -81,13 +79,21 @@ public class DegradeControllerV2 {
         }
     }
 
+    private int countNotNullAndNotNegative(Number... values) {
+        int notNullCount = 0;
+        for (Number value : values) {
+            if (value != null && value.doubleValue() >= 0) {
+                notNullCount++;
+            }
+        }
+        return notNullCount;
+    }
+
     @RequestMapping("/new.json")
-    public Result<DegradeRuleEntity> add(HttpServletRequest request,
-                                         String app, String ip, Integer port, String limitApp, String resource,
-                                         Double count, Integer timeWindow, Integer grade) {
+    Result<?> add(HttpServletRequest request,
+                  String app, String ip, Integer port, Double avgLoad, Long avgRt, Long maxThread, Double qps) {
         AuthUser authUser = authService.getAuthUser(request);
         authUser.authTarget(app, PrivilegeType.WRITE_RULE);
-
         if (StringUtil.isBlank(app)) {
             return Result.ofFail(-1, "app can't be null or empty");
         }
@@ -97,39 +103,42 @@ public class DegradeControllerV2 {
         if (port == null) {
             return Result.ofFail(-1, "port can't be null");
         }
-        if (StringUtil.isBlank(limitApp)) {
-            return Result.ofFail(-1, "limitApp can't be null or empty");
+        int notNullCount = countNotNullAndNotNegative(avgLoad, avgRt, maxThread, qps);
+        if (notNullCount != 1) {
+            return Result.ofFail(-1, "only one of [avgLoad, avgRt, maxThread, qps] "
+                    + "value must be set >= 0, but " + notNullCount + " values get");
         }
-        if (StringUtil.isBlank(resource)) {
-            return Result.ofFail(-1, "resource can't be null or empty");
-        }
-        if (count == null) {
-            return Result.ofFail(-1, "count can't be null");
-        }
-        if (timeWindow == null) {
-            return Result.ofFail(-1, "timeWindow can't be null");
-        }
-        if (grade == null) {
-            return Result.ofFail(-1, "grade can't be null");
-        }
-        if (grade < RuleConstant.DEGRADE_GRADE_RT || grade > RuleConstant.DEGRADE_GRADE_EXCEPTION_COUNT) {
-            return Result.ofFail(-1, "Invalid grade: " + grade);
-        }
-        DegradeRuleEntity entity = new DegradeRuleEntity();
+        SystemRuleEntity entity = new SystemRuleEntity();
         entity.setApp(app.trim());
         entity.setIp(ip.trim());
         entity.setPort(port);
-        entity.setLimitApp(limitApp.trim());
-        entity.setResource(resource.trim());
-        entity.setCount(count);
-        entity.setTimeWindow(timeWindow);
-        entity.setGrade(grade);
+        // -1 is a fake value
+        if (avgLoad != null) {
+            entity.setAvgLoad(avgLoad);
+        } else {
+            entity.setAvgLoad(-1D);
+        }
+        if (avgRt != null) {
+            entity.setAvgRt(avgRt);
+        } else {
+            entity.setAvgRt(-1L);
+        }
+        if (maxThread != null) {
+            entity.setMaxThread(maxThread);
+        } else {
+            entity.setMaxThread(-1L);
+        }
+        if (qps != null) {
+            entity.setQps(qps);
+        } else {
+            entity.setQps(-1D);
+        }
         Date date = new Date();
         entity.setGmtCreate(date);
         entity.setGmtModified(date);
         try {
             entity = repository.save(entity);
-            publishRules(app, ip, port);
+            publishRules(app, ip,port);
         } catch (Throwable throwable) {
             logger.error("add error:", throwable);
             return Result.ofThrowable(-1, throwable);
@@ -139,19 +148,13 @@ public class DegradeControllerV2 {
     }
 
     @RequestMapping("/save.json")
-    public Result<DegradeRuleEntity> updateIfNotNull(HttpServletRequest request,
-                                                     Long id, String app, String limitApp, String resource,
-                                                     Double count, Integer timeWindow, Integer grade) {
+    Result<?> updateIfNotNull(HttpServletRequest request,
+                              Long id, String app, Double avgLoad, Long avgRt, Long maxThread, Double qps) {
         AuthUser authUser = authService.getAuthUser(request);
         if (id == null) {
             return Result.ofFail(-1, "id can't be null");
         }
-        if (grade != null) {
-            if (grade < RuleConstant.DEGRADE_GRADE_RT || grade > RuleConstant.DEGRADE_GRADE_EXCEPTION_COUNT) {
-                return Result.ofFail(-1, "Invalid grade: " + grade);
-            }
-        }
-        DegradeRuleEntity entity = repository.findById(id);
+        SystemRuleEntity entity = repository.findById(id);
         if (entity == null) {
             return Result.ofFail(-1, "id " + id + " dose not exist");
         }
@@ -159,21 +162,29 @@ public class DegradeControllerV2 {
         if (StringUtil.isNotBlank(app)) {
             entity.setApp(app.trim());
         }
-
-        if (StringUtil.isNotBlank(limitApp)) {
-            entity.setLimitApp(limitApp.trim());
+        if (avgLoad != null) {
+            if (avgLoad < 0) {
+                return Result.ofFail(-1, "avgLoad must >= 0");
+            }
+            entity.setAvgLoad(avgLoad);
         }
-        if (StringUtil.isNotBlank(resource)) {
-            entity.setResource(resource.trim());
+        if (avgRt != null) {
+            if (avgRt < 0) {
+                return Result.ofFail(-1, "avgRt must >= 0");
+            }
+            entity.setAvgRt(avgRt);
         }
-        if (count != null) {
-            entity.setCount(count);
+        if (maxThread != null) {
+            if (maxThread < 0) {
+                return Result.ofFail(-1, "maxThread must >= 0");
+            }
+            entity.setMaxThread(maxThread);
         }
-        if (timeWindow != null) {
-            entity.setTimeWindow(timeWindow);
-        }
-        if (grade != null) {
-            entity.setGrade(grade);
+        if (qps != null) {
+            if (qps < 0) {
+                return Result.ofFail(-1, "qps must >= 0");
+            }
+            entity.setQps(qps);
         }
         Date date = new Date();
         entity.setGmtModified(date);
@@ -184,17 +195,17 @@ public class DegradeControllerV2 {
             logger.error("save error:", throwable);
             return Result.ofThrowable(-1, throwable);
         }
+
         return Result.ofSuccess(entity);
     }
 
     @RequestMapping("/delete.json")
-    public Result<Long> delete(HttpServletRequest request, Long id) {
+    Result<?> delete(HttpServletRequest request, Long id) {
         AuthUser authUser = authService.getAuthUser(request);
         if (id == null) {
             return Result.ofFail(-1, "id can't be null");
         }
-
-        DegradeRuleEntity oldEntity = repository.findById(id);
+        SystemRuleEntity oldEntity = repository.findById(id);
         if (oldEntity == null) {
             return Result.ofSuccess(null);
         }
@@ -211,7 +222,7 @@ public class DegradeControllerV2 {
     }
 
     private void publishRules(String app, String ip, Integer port) throws Exception {
-        List<DegradeRuleEntity> rules = repository.findAllByMachine(MachineInfo.of(app, ip, port));
-        degradeRuleApolloService.publish(app, rules);
+        List<SystemRuleEntity> rules = repository.findAllByMachine(MachineInfo.of(app, ip, port));
+         systemRuleApolloService.publish(app, rules);
     }
 }
