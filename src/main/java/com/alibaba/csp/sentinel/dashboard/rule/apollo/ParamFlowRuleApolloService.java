@@ -15,8 +15,7 @@
  */
 package com.alibaba.csp.sentinel.dashboard.rule.apollo;
 
-import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.AuthorityRuleEntity;
-import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.DegradeRuleEntity;
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.ParamFlowRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleService;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.fastjson.JSON;
@@ -28,31 +27,31 @@ import java.util.List;
 
 /**
  * @author zhaoyunxing
- * @date: 2019-05-16 03:05
+ * @date: 2019-05-16 03:40
  * @since 1.6.0
  */
 @Service
-public class AuthorityRuleApolloService implements DynamicRuleService<List<AuthorityRuleEntity>> {
+public class ParamFlowRuleApolloService implements DynamicRuleService<List<ParamFlowRuleEntity>> {
 
     private final ApolloDynamicRuleService apolloService;
 
     @Autowired
-    public AuthorityRuleApolloService(ApolloDynamicRuleService apolloService) {
+    public ParamFlowRuleApolloService(ApolloDynamicRuleService apolloService) {
         this.apolloService = apolloService;
     }
 
     @Override
-    public List<AuthorityRuleEntity> getRules(String appName) throws Exception {
+    public List<ParamFlowRuleEntity> getRules(String appName) throws Exception {
 
-        String rules = apolloService.getRules(appName, authorityRuleKey);
+        String rules = apolloService.getRules(appName, paramFlowRuleKey);
         if (StringUtil.isEmpty(rules)) {
             return new ArrayList<>();
         }
-        return JSON.parseArray(rules, AuthorityRuleEntity.class);
+        return JSON.parseArray(rules, ParamFlowRuleEntity.class);
     }
 
     @Override
-    public void publish(String appName, List<AuthorityRuleEntity> rules) throws Exception {
-        apolloService.publish(appName, authorityRuleKey, JSON.toJSONString(rules));
+    public void publish(String appName, List<ParamFlowRuleEntity> rules) throws Exception {
+        apolloService.publish(appName, paramFlowRuleKey, JSON.toJSONString(rules));
     }
 }

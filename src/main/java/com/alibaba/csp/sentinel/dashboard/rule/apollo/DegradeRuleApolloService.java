@@ -15,6 +15,7 @@
  */
 package com.alibaba.csp.sentinel.dashboard.rule.apollo;
 
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.DegradeRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleService;
 import com.alibaba.csp.sentinel.util.StringUtil;
@@ -27,30 +28,31 @@ import java.util.List;
 
 /**
  * @author zhaoyunxing
+ * @date: 2019-05-16 03:00
  * @since 1.6.0
  */
 @Service
-public class FlowRuleApolloService implements DynamicRuleService<List<FlowRuleEntity>> {
+public class DegradeRuleApolloService implements DynamicRuleService<List<DegradeRuleEntity>> {
 
     private final ApolloDynamicRuleService apolloService;
 
     @Autowired
-    public FlowRuleApolloService(ApolloDynamicRuleService apolloService) {
+    public DegradeRuleApolloService(ApolloDynamicRuleService apolloService) {
         this.apolloService = apolloService;
     }
 
     @Override
-    public List<FlowRuleEntity> getRules(String appName) throws Exception {
+    public List<DegradeRuleEntity> getRules(String appName) throws Exception {
 
-        String rules = apolloService.getRules(appName, flowRuleKey);
+        String rules = apolloService.getRules(appName, degradeRuleKey);
         if (StringUtil.isEmpty(rules)) {
             return new ArrayList<>();
         }
-        return JSON.parseArray(rules, FlowRuleEntity.class);
+        return JSON.parseArray(rules, DegradeRuleEntity.class);
     }
 
     @Override
-    public void publish(String appName, List<FlowRuleEntity> rules) throws Exception {
-        apolloService.publish(appName, flowRuleKey, JSON.toJSONString(rules));
+    public void publish(String appName, List<DegradeRuleEntity> rules) throws Exception {
+        apolloService.publish(appName, degradeRuleKey, JSON.toJSONString(rules));
     }
 }

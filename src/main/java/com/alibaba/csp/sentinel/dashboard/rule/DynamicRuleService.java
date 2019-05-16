@@ -5,7 +5,7 @@ package com.alibaba.csp.sentinel.dashboard.rule;
 
 /**
  * @author zhaoyunxing
- * @date: 2019-05-16 14:11
+ * @date: 2019-05-16 02:01
  * @des:
  */
 public interface DynamicRuleService<T> {
