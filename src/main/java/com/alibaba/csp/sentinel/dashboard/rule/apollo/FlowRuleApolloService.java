@@ -16,59 +16,53 @@
 package com.alibaba.csp.sentinel.dashboard.rule.apollo;
 
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
+import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.datasource.Converter;
-import com.alibaba.csp.sentinel.util.AssertUtil;
+import com.alibaba.csp.sentinel.util.StringUtil;
 import com.ctrip.framework.apollo.openapi.client.ApolloOpenApiClient;
-import com.ctrip.framework.apollo.openapi.dto.NamespaceReleaseDTO;
 import com.ctrip.framework.apollo.openapi.dto.OpenItemDTO;
+import com.ctrip.framework.apollo.openapi.dto.OpenNamespaceDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author 2385585770@qq.com
  * @since 1.6.0
  */
-@Service("flowRuleApolloPublisher")
-public class FlowRuleApolloPublisher implements DynamicRulePublisher<List<FlowRuleEntity>> {
+@Service("flowRuleApolloProvider")
+public class FlowRuleApolloProvider implements DynamicRuleProvider<List<FlowRuleEntity>> {
 
     private final ApolloOpenApiClient apolloOpenApiClient;
-
-    private final Converter<List<FlowRuleEntity>, String> converter;
+    private final Converter<String, List<FlowRuleEntity>> converter;
 
     @Value("${env:DEV}")
     private String env;
 
     @Autowired
-    public FlowRuleApolloPublisher(ApolloOpenApiClient apolloOpenApiClient, Converter<List<FlowRuleEntity>, String> converter) {
+    public FlowRuleApolloProvider(ApolloOpenApiClient apolloOpenApiClient, Converter<String, List<FlowRuleEntity>> converter) {
         this.apolloOpenApiClient = apolloOpenApiClient;
         this.converter = converter;
     }
 
     @Override
-    public void publish(String app, List<FlowRuleEntity> rules) throws Exception {
+    public List<FlowRuleEntity> getRules(String appName) throws Exception {
         String flowDataId = "sentinel.flowRules";
+        OpenNamespaceDTO openNamespaceDTO = apolloOpenApiClient.getNamespace(appName, env, "default", "application");
+        String rules = openNamespaceDTO
+            .getItems()
+            .stream()
+            .filter(p -> p.getKey().equals(flowDataId))
+            .map(OpenItemDTO::getValue)
+            .findFirst()
+            .orElse("");
 
-        AssertUtil.notEmpty(app, "app name cannot be empty");
-        if (rules == null) {
-            return;
+        if (StringUtil.isEmpty(rules)) {
+            return new ArrayList<>();
         }
-
-        OpenItemDTO openItemDTO = new OpenItemDTO();
-        openItemDTO.setKey(flowDataId);
-        openItemDTO.setValue(converter.convert(rules));
-        openItemDTO.setComment("modify by sentinel-dashboard");
-        openItemDTO.setDataChangeCreatedBy("apollo");
-        apolloOpenApiClient.createOrUpdateItem(app, env, "default", "application", openItemDTO);
-
-        // Release configuration
-        NamespaceReleaseDTO namespaceReleaseDTO = new NamespaceReleaseDTO();
-        namespaceReleaseDTO.setEmergencyPublish(true);
-        namespaceReleaseDTO.setReleaseComment("release by sentinel-dashboard");
-        namespaceReleaseDTO.setReleasedBy("apollo");
-        namespaceReleaseDTO.setReleaseTitle("release by sentinel-dashboard");
-        apolloOpenApiClient.publishNamespace(app, env, "default", "application", namespaceReleaseDTO);
+        return converter.convert(rules);
     }
 }

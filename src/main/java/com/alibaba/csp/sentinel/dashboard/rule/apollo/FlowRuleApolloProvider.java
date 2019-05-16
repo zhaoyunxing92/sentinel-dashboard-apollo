@@ -16,7 +16,6 @@
 package com.alibaba.csp.sentinel.dashboard.rule.apollo;
 
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
-import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.datasource.Converter;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import com.ctrip.framework.apollo.openapi.client.ApolloOpenApiClient;
@@ -24,25 +23,29 @@ import com.ctrip.framework.apollo.openapi.dto.OpenItemDTO;
 import com.ctrip.framework.apollo.openapi.dto.OpenNamespaceDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author hantianwei@gmail.com
- * @since 1.5.0
+ * @author 2385585770@qq.com
+ * @since 1.6.0
  */
-@Component("flowRuleApolloProvider")
+@Service("flowRuleApolloProvider")
 public class FlowRuleApolloProvider implements DynamicRuleProvider<List<FlowRuleEntity>> {
 
-    @Autowired
-    private ApolloOpenApiClient apolloOpenApiClient;
-    @Autowired
-    private Converter<String, List<FlowRuleEntity>> converter;
+    private final ApolloOpenApiClient apolloOpenApiClient;
+    private final Converter<String, List<FlowRuleEntity>> converter;
 
     @Value("${env:DEV}")
     private String env;
+
+    @Autowired
+    public FlowRuleApolloProvider(ApolloOpenApiClient apolloOpenApiClient, Converter<String, List<FlowRuleEntity>> converter) {
+        this.apolloOpenApiClient = apolloOpenApiClient;
+        this.converter = converter;
+    }
 
     @Override
     public List<FlowRuleEntity> getRules(String appName) throws Exception {
