@@ -10,9 +10,25 @@ package com.alibaba.csp.sentinel.dashboard.rule;
  */
 public interface DynamicRuleService<T> {
     /**
-     *
+     * 流控规则
      */
     String flowRuleKey = "sentinel.flowRules";
+    /**
+     * 熔断降级规则
+     */
+    String degradeRuleKey = "sentinel.degradeRules";
+    /**
+     * 授权规则
+     */
+    String authorityRuleKey = "sentinel.authorityRules";
+    /**
+     * 系统规则
+     */
+    String systemRuleKey = "sentinel.systemRules";
+    /**
+     * 热点规则
+     */
+    String paramFlowRuleKey = "sentinel.paramFlowRules";
 
     /**
      * 获取
