@@ -42,7 +42,7 @@ import java.util.List;
  * @author zhaoyunxing
  */
 @RestController
-@RequestMapping(value = "/system", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/system", produces = MediaType.APPLICATION_PROBLEM_JSON_VALUE)
 public class SystemControllerV2 {
     private static Logger logger = LoggerFactory.getLogger(SystemControllerV2.class);
 

@@ -29,6 +29,7 @@ import com.alibaba.csp.sentinel.dashboard.repository.rule.RuleRepository;
 import com.alibaba.csp.sentinel.dashboard.rule.apollo.ParamFlowRuleApolloService;
 import com.alibaba.csp.sentinel.dashboard.util.VersionUtils;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
+import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRule;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,10 +134,10 @@ public class ParamFlowRuleControllerV2 {
             return unsupportedVersion();
         }
         entity.setId(null);
-        entity.getRule().setResource(entity.getResource().trim());
-        Date date = new Date();
-        entity.setGmtCreate(date);
-        entity.setGmtModified(date);
+       // entity.getRule().setResource(entity.getResource().trim());
+        //   Date date = new Date();
+        // entity.setGmtCreate(date);
+        //entity.setGmtModified(date);
         try {
             entity = repository.save(entity);
             publishRules(entity.getApp(), entity.getIp(), entity.getPort());
@@ -170,9 +171,9 @@ public class ParamFlowRuleControllerV2 {
         if (entity.getRule() == null) {
             return Result.ofFail(-1, "rule can't be null");
         }
-        if (StringUtil.isBlank(entity.getResource())) {
-            return Result.ofFail(-1, "resource name cannot be null or empty");
-        }
+        //        if (StringUtil.isBlank(entity.getResource())) {
+        //            return Result.ofFail(-1, "resource name cannot be null or empty");
+        //        }
         if (entity.getCount() < 0) {
             return Result.ofFail(-1, "count should be valid");
         }
@@ -206,9 +207,9 @@ public class ParamFlowRuleControllerV2 {
             return unsupportedVersion();
         }
         entity.setId(id);
-        Date date = new Date();
-        entity.setGmtCreate(oldEntity.getGmtCreate());
-        entity.setGmtModified(date);
+       // Date date = new Date();
+        // entity.setGmtCreate(oldEntity.getGmtCreate());
+        // entity.setGmtModified(date);
         try {
             entity = repository.save(entity);
             publishRules(entity.getApp(), entity.getIp(), entity.getPort());

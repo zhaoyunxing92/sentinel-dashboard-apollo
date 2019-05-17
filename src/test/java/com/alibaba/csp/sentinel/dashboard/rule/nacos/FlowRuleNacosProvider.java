@@ -15,23 +15,11 @@
  */
 package com.alibaba.csp.sentinel.dashboard.rule.nacos;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
-import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
-import com.alibaba.csp.sentinel.datasource.Converter;
-import com.alibaba.csp.sentinel.util.StringUtil;
-import com.alibaba.nacos.api.config.ConfigService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 /**
  * @author Eric Zhao
  * @since 1.4.0
  */
-@Component("flowRuleNacosProvider")
+/*@Component("flowRuleNacosProvider")
 public class FlowRuleNacosProvider implements DynamicRuleProvider<List<FlowRuleEntity>> {
 
     @Autowired
@@ -48,4 +36,4 @@ public class FlowRuleNacosProvider implements DynamicRuleProvider<List<FlowRuleE
         }
         return converter.convert(rules);
     }
-}
+}*/

@@ -30,6 +30,8 @@ app.service('SystemService', ['$http', function ($http) {
       param.qps = rule.qps;
     }
 
+    console.log(param);
+
     return $http({
       url: '/system/new.json',
       params: param,

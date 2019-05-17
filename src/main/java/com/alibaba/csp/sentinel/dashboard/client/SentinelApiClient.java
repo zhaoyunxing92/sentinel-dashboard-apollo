@@ -430,21 +430,21 @@ public class SentinelApiClient {
      * @return all retrieved parameter flow rules
      * @since 0.2.1
      */
-    public CompletableFuture<List<ParamFlowRuleEntity>> fetchParamFlowRulesOfMachine(String app, String ip, int port) {
-        try {
-            AssertUtil.notEmpty(app, "Bad app name");
-            AssertUtil.notEmpty(ip, "Bad machine IP");
-            AssertUtil.isTrue(port > 0, "Bad machine port");
-            return fetchItemsAsync(ip, port, GET_PARAM_RULE_PATH, null, ParamFlowRule.class)
-                .thenApply(rules -> rules.stream()
-                    .map(e -> ParamFlowRuleEntity.fromAuthorityRule(app, ip, port, e))
-                    .collect(Collectors.toList())
-                );
-        } catch (Exception e) {
-            logger.error("Error when fetching parameter flow rules", e);
-            return AsyncUtils.newFailedFuture(e);
-        }
-    }
+//    public CompletableFuture<List<ParamFlowRuleEntity>> fetchParamFlowRulesOfMachine(String app, String ip, int port) {
+//        try {
+//            AssertUtil.notEmpty(app, "Bad app name");
+//            AssertUtil.notEmpty(ip, "Bad machine IP");
+//            AssertUtil.isTrue(port > 0, "Bad machine port");
+//            return fetchItemsAsync(ip, port, GET_PARAM_RULE_PATH, null, ParamFlowRule.class)
+//                .thenApply(rules -> rules.stream()
+//                    .map(e -> ParamFlowRuleEntity.fromAuthorityRule(app, ip, port, e))
+//                    .collect(Collectors.toList())
+//                );
+//        } catch (Exception e) {
+//            logger.error("Error when fetching parameter flow rules", e);
+//            return AsyncUtils.newFailedFuture(e);
+//        }
+//    }
 
     /**
      * Fetch all authority rules from provided machine.
@@ -514,33 +514,33 @@ public class SentinelApiClient {
         return setRules(app, ip, port, AUTHORITY_TYPE, rules);
     }
 
-    public CompletableFuture<Void> setParamFlowRuleOfMachine(String app, String ip, int port, List<ParamFlowRuleEntity> rules) {
-        if (rules == null) {
-            return CompletableFuture.completedFuture(null);
-        }
-        if (StringUtil.isBlank(ip) || port <= 0) {
-            return AsyncUtils.newFailedFuture(new IllegalArgumentException("Invalid parameter"));
-        }
-        try {
-            String data = JSON.toJSONString(
-                rules.stream().map(ParamFlowRuleEntity::getRule).collect(Collectors.toList())
-            );
-            Map<String, String> params = new HashMap<>(1);
-            params.put("data", data);
-            return executeCommand(app, ip, port, SET_PARAM_RULE_PATH, params, true)
-                .thenCompose(e -> {
-                    if (CommandConstants.MSG_SUCCESS.equals(e)) {
-                        return CompletableFuture.completedFuture(null);
-                    } else {
-                        logger.warn("Push parameter flow rules to client failed: " + e);
-                        return AsyncUtils.newFailedFuture(new RuntimeException(e));
-                    }
-                });
-        } catch (Exception ex) {
-            logger.warn("Error when setting parameter flow rule", ex);
-            return AsyncUtils.newFailedFuture(ex);
-        }
-    }
+//    public CompletableFuture<Void> setParamFlowRuleOfMachine(String app, String ip, int port, List<ParamFlowRuleEntity> rules) {
+//        if (rules == null) {
+//            return CompletableFuture.completedFuture(null);
+//        }
+//        if (StringUtil.isBlank(ip) || port <= 0) {
+//            return AsyncUtils.newFailedFuture(new IllegalArgumentException("Invalid parameter"));
+//        }
+//        try {
+//            String data = JSON.toJSONString(
+//                rules.stream().map(ParamFlowRuleEntity::getRule).collect(Collectors.toList())
+//            );
+//            Map<String, String> params = new HashMap<>(1);
+//            params.put("data", data);
+//            return executeCommand(app, ip, port, SET_PARAM_RULE_PATH, params, true)
+//                .thenCompose(e -> {
+//                    if (CommandConstants.MSG_SUCCESS.equals(e)) {
+//                        return CompletableFuture.completedFuture(null);
+//                    } else {
+//                        logger.warn("Push parameter flow rules to client failed: " + e);
+//                        return AsyncUtils.newFailedFuture(new RuntimeException(e));
+//                    }
+//                });
+//        } catch (Exception ex) {
+//            logger.warn("Error when setting parameter flow rule", ex);
+//            return AsyncUtils.newFailedFuture(ex);
+//        }
+//    }
 
     // Cluster related
 

@@ -51,6 +51,7 @@ public class FlowRuleApolloService implements DynamicRuleService<List<FlowRuleEn
 
     @Override
     public void publish(String appName, List<FlowRuleEntity> rules) throws Exception {
+
         apolloService.publish(appName, flowRuleKey, JSON.toJSONString(rules));
     }
 }

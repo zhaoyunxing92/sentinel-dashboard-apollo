@@ -31,7 +31,8 @@ public class AuthorityRuleEntity extends AbstractRuleEntity<AuthorityRule> {
 
     public AuthorityRuleEntity(AuthorityRule authorityRule) {
         AssertUtil.notNull(authorityRule, "Authority rule should not be null");
-        this.rule = authorityRule;
+        //        this.rule = authorityRule;
+        super.setRule(authorityRule);
     }
 
     public static AuthorityRuleEntity fromAuthorityRule(String app, String ip, Integer port, AuthorityRule rule) {
@@ -44,21 +45,21 @@ public class AuthorityRuleEntity extends AbstractRuleEntity<AuthorityRule> {
 
     @JsonIgnore
     public String getLimitApp() {
-        return rule.getLimitApp();
+        return getRule().getLimitApp();
     }
 
     @JsonIgnore
     public String getResource() {
-        return rule.getResource();
+        return getRule().getResource();
     }
 
     @JsonIgnore
     public int getStrategy() {
-        return rule.getStrategy();
+        return getRule().getStrategy();
     }
-    
+
     @Override
     public Rule toRule() {
-        return rule;
+        return getRule();
     }
 }

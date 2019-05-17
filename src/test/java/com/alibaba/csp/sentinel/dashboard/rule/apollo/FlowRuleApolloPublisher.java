@@ -15,25 +15,11 @@
  */
 package com.alibaba.csp.sentinel.dashboard.rule.apollo;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
-import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
-import com.alibaba.csp.sentinel.datasource.Converter;
-import com.alibaba.csp.sentinel.util.AssertUtil;
-
-import com.ctrip.framework.apollo.openapi.client.ApolloOpenApiClient;
-import com.ctrip.framework.apollo.openapi.dto.NamespaceReleaseDTO;
-import com.ctrip.framework.apollo.openapi.dto.OpenItemDTO;
-
 /**
  * @author hantianwei@gmail.com
  * @since 1.5.0
  */
-@Component("flowRuleApolloPublisher")
+/*@Component("flowRuleApolloPublisher")
 public class FlowRuleApolloPublisher implements DynamicRulePublisher<List<FlowRuleEntity>> {
 
     @Autowired
@@ -66,4 +52,4 @@ public class FlowRuleApolloPublisher implements DynamicRulePublisher<List<FlowRu
         namespaceReleaseDTO.setReleaseTitle("Modify or add configurations");
         apolloOpenApiClient.publishNamespace(appId, "DEV", "default", "application", namespaceReleaseDTO);
     }
-}
+}*/

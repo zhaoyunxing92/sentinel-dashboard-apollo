@@ -34,7 +34,7 @@ public abstract class AbstractRuleEntity<T extends AbstractRule> implements Rule
     @JSONField(serialize = false)
     protected Integer port;
 
-    protected T rule;
+    private T rule;
 
     @JSONField(serialize = false)
     private Date gmtCreate;
