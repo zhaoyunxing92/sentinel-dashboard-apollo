@@ -18,6 +18,7 @@ package com.alibaba.csp.sentinel.dashboard.controller.v2;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService.AuthUser;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService.PrivilegeType;
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.ParamFlowRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.SystemRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.domain.Result;
@@ -56,7 +57,7 @@ public class SystemControllerV2 {
         this.authService = authService;
     }
 
-    @GetMapping("/rules.json")
+    @RequestMapping("/rules.json")
     Result<List<SystemRuleEntity>> queryMachineRules(HttpServletRequest request, String app, String ip, Integer port) {
         AuthUser authUser = authService.getAuthUser(request);
         authUser.authTarget(app, PrivilegeType.READ_RULE);
@@ -71,6 +72,12 @@ public class SystemControllerV2 {
         }
         try {
             List<SystemRuleEntity> rules = systemRuleApolloService.getRules(app);
+            if (rules != null && !rules.isEmpty()) {
+                for (SystemRuleEntity entity : rules) {
+                    entity.setApp(app);
+                }
+            }
+
             rules = repository.saveAll(rules);
             return Result.ofSuccess(rules);
         } catch (Throwable throwable) {

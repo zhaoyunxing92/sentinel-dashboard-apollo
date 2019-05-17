@@ -20,6 +20,7 @@ import com.alibaba.csp.sentinel.dashboard.auth.AuthService.AuthUser;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService.PrivilegeType;
 import com.alibaba.csp.sentinel.dashboard.client.CommandNotFoundException;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.SentinelVersion;
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.DegradeRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.ParamFlowRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.AppManagement;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
@@ -95,8 +96,12 @@ public class ParamFlowRuleControllerV2 {
         }
         try {
             List<ParamFlowRuleEntity> rules = paramFlowRuleApolloService.getRules(app);
-            repository.saveAll(rules);
-
+            if (rules != null && !rules.isEmpty()) {
+                for (ParamFlowRuleEntity entity : rules) {
+                    entity.setApp(app);
+                }
+            }
+            rules = repository.saveAll(rules);
             return Result.ofSuccess(rules);
         } catch (ExecutionException ex) {
             logger.error("Error when querying parameter flow rules", ex.getCause());
@@ -251,7 +256,7 @@ public class ParamFlowRuleControllerV2 {
 
     private void publishRules(String app, String ip, Integer port) throws Exception {
         List<ParamFlowRuleEntity> rules = repository.findAllByMachine(MachineInfo.of(app, ip, port));
-         paramFlowRuleApolloService.publish(app, rules);
+        paramFlowRuleApolloService.publish(app, rules);
     }
 
     private <R> Result<R> unsupportedVersion() {
