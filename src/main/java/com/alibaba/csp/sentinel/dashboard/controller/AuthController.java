@@ -68,7 +68,7 @@ public class AuthController {
         }
 
         AuthService.AuthUser authUser = new SimpleWebAuthServiceImpl.SimpleWebAuthUserImpl(username);
-        request.getSession().setAttribute(SimpleWebAuthServiceImpl.WEB_SESSTION_KEY, authUser);
+        request.getSession().setAttribute(SimpleWebAuthServiceImpl.WEB_SESSION_KEY, authUser);
         return Result.ofSuccess(authUser);
     }
 

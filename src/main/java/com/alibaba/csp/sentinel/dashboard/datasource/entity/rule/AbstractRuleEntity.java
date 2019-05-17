@@ -18,22 +18,27 @@ package com.alibaba.csp.sentinel.dashboard.datasource.entity.rule;
 import java.util.Date;
 
 import com.alibaba.csp.sentinel.slots.block.AbstractRule;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * @author Eric Zhao
  * @since 0.2.1
  */
 public abstract class AbstractRuleEntity<T extends AbstractRule> implements RuleEntity {
-
+    @JSONField(serialize = false)
     protected Long id;
-
+    @JSONField(serialize = false)
     protected String app;
+    @JSONField(serialize = false)
     protected String ip;
+    @JSONField(serialize = false)
     protected Integer port;
 
-    protected T rule;
+    private T rule;
 
+    @JSONField(serialize = false)
     private Date gmtCreate;
+    @JSONField(serialize = false)
     private Date gmtModified;
 
     @Override

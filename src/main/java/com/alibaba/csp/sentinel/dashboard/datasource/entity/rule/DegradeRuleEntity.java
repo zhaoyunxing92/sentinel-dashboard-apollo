@@ -18,15 +18,25 @@ package com.alibaba.csp.sentinel.dashboard.datasource.entity.rule;
 import java.util.Date;
 
 import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRule;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * @author leyou
  */
 public class DegradeRuleEntity implements RuleEntity {
+
+    @JSONField(serialize = false)
     private Long id;
+
+    @JSONField(serialize = false)
     private String app;
+
+    @JSONField(serialize = false)
     private String ip;
+
+    @JSONField(serialize = false)
     private Integer port;
+
     private String resource;
     private String limitApp;
     private Double count;
@@ -35,7 +45,11 @@ public class DegradeRuleEntity implements RuleEntity {
      * 0 rt 限流; 1为异常;
      */
     private Integer grade;
+
+    @JSONField(serialize = false)
     private Date gmtCreate;
+
+    @JSONField(serialize = false)
     private Date gmtModified;
 
     public static DegradeRuleEntity fromDegradeRule(String app, String ip, Integer port, DegradeRule rule) {

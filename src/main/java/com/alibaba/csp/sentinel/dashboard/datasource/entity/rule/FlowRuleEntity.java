@@ -19,16 +19,23 @@ import java.util.Date;
 
 import com.alibaba.csp.sentinel.slots.block.flow.ClusterFlowConfig;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * @author leyou
+ * @ desc apollo参数会注入过多导致限流效果不起用 可以参考:https://github.com/spring-cloud-incubator/spring-cloud-alibaba/issues/569
  */
 public class FlowRuleEntity implements RuleEntity {
 
+    @JSONField(serialize = false)
     private Long id;
+    @JSONField(serialize = false)
     private String app;
+    @JSONField(serialize = false)
     private String ip;
+    @JSONField(serialize = false)
     private Integer port;
+
     private String limitApp;
     private String resource;
     /**
@@ -57,7 +64,9 @@ public class FlowRuleEntity implements RuleEntity {
      */
     private ClusterFlowConfig clusterConfig;
 
+    @JSONField(serialize = false)
     private Date gmtCreate;
+    @JSONField(serialize = false)
     private Date gmtModified;
 
     public static FlowRuleEntity fromFlowRule(String app, String ip, Integer port, FlowRule rule) {

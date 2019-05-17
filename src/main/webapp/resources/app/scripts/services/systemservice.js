@@ -8,7 +8,7 @@ app.service('SystemService', ['$http', function ($http) {
       port: port
     };
     return $http({
-      url: 'system/rules.json',
+      url: '/system/rules.json',
       params: param,
       method: 'GET'
     });
@@ -29,6 +29,8 @@ app.service('SystemService', ['$http', function ($http) {
     } else if (rule.grade === 3) {// qps
       param.qps = rule.qps;
     }
+
+    console.log(param);
 
     return $http({
       url: '/system/new.json',

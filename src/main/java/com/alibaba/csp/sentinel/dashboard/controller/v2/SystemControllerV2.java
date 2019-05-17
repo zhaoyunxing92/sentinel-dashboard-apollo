@@ -13,24 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.csp.sentinel.dashboard.controller;
+package com.alibaba.csp.sentinel.dashboard.controller.v2;
+
+import com.alibaba.csp.sentinel.dashboard.auth.AuthService;
+import com.alibaba.csp.sentinel.dashboard.auth.AuthService.AuthUser;
+import com.alibaba.csp.sentinel.dashboard.auth.AuthService.PrivilegeType;
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.ParamFlowRuleEntity;
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.SystemRuleEntity;
+import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
+import com.alibaba.csp.sentinel.dashboard.domain.Result;
+import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemSystemRuleStore;
+import com.alibaba.csp.sentinel.dashboard.rule.apollo.SystemRuleApolloService;
+import com.alibaba.csp.sentinel.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author leyou(lihao)
+ * @author zhaoyunxing
  */
-/*@Controller
-@RequestMapping(value = "/system", produces = MediaType.APPLICATION_JSON_VALUE)
-public class SystemController {
-    private static Logger logger = LoggerFactory.getLogger(SystemController.class);
+@RestController
+@RequestMapping(value = "/system", produces = MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+public class SystemControllerV2 {
+    private static Logger logger = LoggerFactory.getLogger(SystemControllerV2.class);
+
+    private final InMemSystemRuleStore repository;
+    private final SystemRuleApolloService systemRuleApolloService;
+    private final AuthService<HttpServletRequest> authService;
 
     @Autowired
-    private InMemSystemRuleStore repository;
-    @Autowired
-    private SentinelApiClient sentinelApiClient;
-    @Autowired
-    private AuthService<HttpServletRequest> authService;
+    public SystemControllerV2(InMemSystemRuleStore repository, SystemRuleApolloService systemRuleApolloService, AuthService<HttpServletRequest> authService) {
+        this.repository = repository;
+        this.systemRuleApolloService = systemRuleApolloService;
+        this.authService = authService;
+    }
 
-    @ResponseBody
     @RequestMapping("/rules.json")
     Result<List<SystemRuleEntity>> queryMachineRules(HttpServletRequest request, String app, String ip, Integer port) {
         AuthUser authUser = authService.getAuthUser(request);
@@ -45,7 +71,13 @@ public class SystemController {
             return Result.ofFail(-1, "port can't be null");
         }
         try {
-            List<SystemRuleEntity> rules = sentinelApiClient.fetchSystemRuleOfMachine(app, ip, port);
+            List<SystemRuleEntity> rules = systemRuleApolloService.getRules(app);
+            if (rules != null && !rules.isEmpty()) {
+                for (SystemRuleEntity entity : rules) {
+                    entity.setApp(app);
+                }
+            }
+
             rules = repository.saveAll(rules);
             return Result.ofSuccess(rules);
         } catch (Throwable throwable) {
@@ -56,15 +88,14 @@ public class SystemController {
 
     private int countNotNullAndNotNegative(Number... values) {
         int notNullCount = 0;
-        for (int i = 0; i < values.length; i++) {
-            if (values[i] != null && values[i].doubleValue() >= 0) {
+        for (Number value : values) {
+            if (value != null && value.doubleValue() >= 0) {
                 notNullCount++;
             }
         }
         return notNullCount;
     }
 
-    @ResponseBody
     @RequestMapping("/new.json")
     Result<?> add(HttpServletRequest request,
                   String app, String ip, Integer port, Double avgLoad, Long avgRt, Long maxThread, Double qps) {
@@ -82,7 +113,7 @@ public class SystemController {
         int notNullCount = countNotNullAndNotNegative(avgLoad, avgRt, maxThread, qps);
         if (notNullCount != 1) {
             return Result.ofFail(-1, "only one of [avgLoad, avgRt, maxThread, qps] "
-                + "value must be set >= 0, but " + notNullCount + " values get");
+                    + "value must be set >= 0, but " + notNullCount + " values get");
         }
         SystemRuleEntity entity = new SystemRuleEntity();
         entity.setApp(app.trim());
@@ -114,17 +145,15 @@ public class SystemController {
         entity.setGmtModified(date);
         try {
             entity = repository.save(entity);
+            publishRules(app, ip,port);
         } catch (Throwable throwable) {
             logger.error("add error:", throwable);
             return Result.ofThrowable(-1, throwable);
         }
-        if (!publishRules(app, ip, port)) {
-            logger.info("publish system rules fail after rule add");
-        }
+
         return Result.ofSuccess(entity);
     }
 
-    @ResponseBody
     @RequestMapping("/save.json")
     Result<?> updateIfNotNull(HttpServletRequest request,
                               Long id, String app, Double avgLoad, Long avgRt, Long maxThread, Double qps) {
@@ -168,17 +197,15 @@ public class SystemController {
         entity.setGmtModified(date);
         try {
             entity = repository.save(entity);
+            publishRules(entity.getApp(), entity.getIp(), entity.getPort());
         } catch (Throwable throwable) {
             logger.error("save error:", throwable);
             return Result.ofThrowable(-1, throwable);
         }
-        if (!publishRules(entity.getApp(), entity.getIp(), entity.getPort())) {
-            logger.info("publish system rules fail after rule update");
-        }
+
         return Result.ofSuccess(entity);
     }
 
-    @ResponseBody
     @RequestMapping("/delete.json")
     Result<?> delete(HttpServletRequest request, Long id) {
         AuthUser authUser = authService.getAuthUser(request);
@@ -192,18 +219,17 @@ public class SystemController {
         authUser.authTarget(oldEntity.getApp(), PrivilegeType.DELETE_RULE);
         try {
             repository.delete(id);
+            publishRules(oldEntity.getApp(), oldEntity.getIp(), oldEntity.getPort());
         } catch (Throwable throwable) {
             logger.error("delete error:", throwable);
             return Result.ofThrowable(-1, throwable);
         }
-        if (!publishRules(oldEntity.getApp(), oldEntity.getIp(), oldEntity.getPort())) {
-            logger.info("publish system rules fail after rule delete");
-        }
+
         return Result.ofSuccess(id);
     }
 
-    private boolean publishRules(String app, String ip, Integer port) {
+    private void publishRules(String app, String ip, Integer port) throws Exception {
         List<SystemRuleEntity> rules = repository.findAllByMachine(MachineInfo.of(app, ip, port));
-        return sentinelApiClient.setSystemRuleOfMachine(app, ip, port, rules);
+         systemRuleApolloService.publish(app, rules);
     }
-}*/
+}
